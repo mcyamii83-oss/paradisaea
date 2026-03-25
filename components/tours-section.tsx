@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { TourInquiryDialog } from "@/components/tour-inquiry-dialog"
+import { ImageUpload } from "@/components/image-upload"
 import type { Tour } from "@/app/page"
 
 interface ToursSectionProps {
@@ -263,29 +264,13 @@ export function ToursSection({ tours, setTours, isAdmin }: ToursSectionProps) {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="imageUrl">URL de Imagen</Label>
-                    <Input
-                      id="imageUrl"
+                    <Label>Imagen del Tour</Label>
+                    <ImageUpload
                       value={formData.imageUrl}
-                      onChange={(e) =>
-                        setFormData({ ...formData, imageUrl: e.target.value })
-                      }
-                      placeholder="https://..."
-                      className="rounded-none"
+                      onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                      aspectRatio="video"
                     />
                   </div>
-                  {formData.imageUrl && (
-                    <div className="aspect-[4/3] w-full overflow-hidden">
-                      <img
-                        src={formData.imageUrl}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src = "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80"
-                        }}
-                      />
-                    </div>
-                  )}
                   <div className="flex gap-3 pt-4">
                     <Button
                       type="button"

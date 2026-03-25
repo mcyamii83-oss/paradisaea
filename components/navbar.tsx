@@ -30,7 +30,8 @@ export function Navbar({ isAdmin, setIsAdmin }: NavbarProps) {
     { href: "#inicio", label: "Inicio" },
     { href: "#nosotros", label: "Nosotros" },
     { href: "#tours", label: "Tours" },
-    { href: "#blog", label: "Blog" },
+    { href: "#blog-posts", label: "Blog" },
+    { href: "#blog", label: "Testimonios" },
     { href: "#faq", label: "FAQ" },
     { href: "#contacto", label: "Contacto" },
   ]
