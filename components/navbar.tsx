@@ -31,6 +31,7 @@ export function Navbar({ isAdmin, setIsAdmin }: NavbarProps) {
     { href: "#nosotros", label: "Nosotros" },
     { href: "#tours", label: "Tours" },
     { href: "#blog", label: "Blog" },
+    { href: "#faq", label: "FAQ" },
     { href: "#contacto", label: "Contacto" },
   ]
 

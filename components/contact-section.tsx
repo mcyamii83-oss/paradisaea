@@ -17,11 +17,11 @@ import {
 // CONFIGURACION - Cambia estos valores por los tuyos
 // ============================================
 const CONFIG = {
-  whatsapp: "525535023294", // Tu numero de WhatsApp (sin + ni espacios)
-  phone: "+52 55 3502 32 94", // Numero formateado para mostrar
+  whatsapp: "525535013294", // Tu numero de WhatsApp (sin + ni espacios)
+  phone: "+52 55 3501 32 94", // Numero formateado para mostrar
   phone2: "+52 55 5456 9159", // Segundo numero (opcional)
   email: "ventas.paradisaea@gmail.com",
-  location: "Villa Coapa, Ciudad de México",
+  location: "Villa Coapa, Ciudad de Mexico",
 }
 // ============================================
 

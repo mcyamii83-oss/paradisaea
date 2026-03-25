@@ -7,9 +7,9 @@ import { Phone, X, MessageCircle } from "lucide-react"
 // CONFIGURACION - Cambia estos valores por los tuyos
 // ============================================
 const CONFIG = {
-  whatsapp: "525535023294", // Tu numero de WhatsApp (sin + ni espacios)
-  phone: "+525535023294", // Tu numero de telefono (para llamadas)
-  defaultMessage: "¡Hola! Me interesa obtener información sobre sus paquetes de viaje.", // Mensaje predeterminado para WhatsApp
+  whatsapp: "525535013294", // Tu numero de WhatsApp (sin + ni espacios)
+  phone: "+525535013294", // Tu numero de telefono (para llamadas)
+  defaultMessage: "Hola! Me interesa obtener informacion sobre sus paquetes de viaje.", // Mensaje predeterminado para WhatsApp
 }
 // ============================================
 

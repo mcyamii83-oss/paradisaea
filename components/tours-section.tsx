@@ -24,6 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { TourInquiryDialog } from "@/components/tour-inquiry-dialog"
 import type { Tour } from "@/app/page"
 
 interface ToursSectionProps {
@@ -57,8 +58,15 @@ export function ToursSection({ tours, setTours, isAdmin }: ToursSectionProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [tourToDelete, setTourToDelete] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(0)
+  const [inquiryDialogOpen, setInquiryDialogOpen] = useState(false)
+  const [selectedTour, setSelectedTour] = useState<Tour | null>(null)
   const sectionRef = useRef<HTMLElement>(null)
   const toursPerPage = 4
+
+  const handleTourClick = (tour: Tour) => {
+    setSelectedTour(tour)
+    setInquiryDialogOpen(true)
+  }
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -305,8 +313,14 @@ export function ToursSection({ tours, setTours, isAdmin }: ToursSectionProps) {
           {displayedTours.map((tour, index) => (
             <article
               key={tour.id}
-              className="tour-card group opacity-0"
+              className="tour-card group opacity-0 cursor-pointer"
               style={{ animationDelay: `${index * 100}ms` }}
+              onClick={() => !isAdmin && handleTourClick(tour)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !isAdmin) handleTourClick(tour)
+              }}
             >
               <div className="relative aspect-[4/3] overflow-hidden mb-4">
                 <img
@@ -350,14 +364,29 @@ export function ToursSection({ tours, setTours, isAdmin }: ToursSectionProps) {
                     {tour.location}
                   </p>
                 )}
-                <div className="flex items-center gap-2">
-                  <span className="text-primary font-bold">
-                    {formatPrice(tour.price)}
-                  </span>
-                  {tour.originalPrice && (
-                    <span className="text-muted-foreground text-sm line-through">
-                      {formatPrice(tour.originalPrice)}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-primary font-bold">
+                      {formatPrice(tour.price)}
                     </span>
+                    {tour.originalPrice && (
+                      <span className="text-muted-foreground text-sm line-through">
+                        {formatPrice(tour.originalPrice)}
+                      </span>
+                    )}
+                  </div>
+                  {!isAdmin && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-none text-xs px-3 h-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleTourClick(tour)
+                      }}
+                    >
+                      Cotizar
+                    </Button>
                   )}
                 </div>
               </div>
@@ -398,6 +427,13 @@ export function ToursSection({ tours, setTours, isAdmin }: ToursSectionProps) {
           </div>
         )}
       </div>
+
+      {/* Tour Inquiry Dialog */}
+      <TourInquiryDialog
+        tour={selectedTour}
+        open={inquiryDialogOpen}
+        onOpenChange={setInquiryDialogOpen}
+      />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

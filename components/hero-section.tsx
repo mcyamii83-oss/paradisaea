@@ -3,12 +3,26 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 
+const WHATSAPP_NUMBER = "525535013294"
+
 export function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     setIsVisible(true)
   }, [])
+
+  const handleCTAClick = (message: string) => {
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
+    window.open(url, "_blank")
+  }
+
+  const scrollToTours = () => {
+    const toursSection = document.getElementById("tours")
+    if (toursSection) {
+      toursSection.scrollIntoView({ behavior: "smooth" })
+    }
+  }
 
   return (
     <section id="inicio" className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
@@ -59,6 +73,7 @@ export function HeroSection() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button
               size="lg"
+              onClick={() => handleCTAClick("Hola! Quiero comenzar mi aventura de viaje con Paradisaea.")}
               className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-sm tracking-wider uppercase font-medium rounded-none"
             >
               Comienza Tu Aventura
@@ -66,9 +81,10 @@ export function HeroSection() {
             <Button
               size="lg"
               variant="outline"
+              onClick={scrollToTours}
               className="bg-[#2d3436] hover:bg-[#2d3436]/80 text-white border-[#2d3436] px-8 py-6 text-sm tracking-wider uppercase font-medium rounded-none"
             >
-              Awesome Places
+              Ver Destinos
             </Button>
           </div>
         </div>

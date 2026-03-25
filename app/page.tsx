@@ -7,6 +7,7 @@ import { IntroSection } from "@/components/intro-section"
 import { ToursSection } from "@/components/tours-section"
 import { CTASection } from "@/components/cta-section"
 import { BlogSection, Testimonial } from "@/components/blog-section"
+import { FAQSection } from "@/components/faq-section"
 import { ContactSection } from "@/components/contact-section"
 import { Footer } from "@/components/footer"
 import { FloatingButtons } from "@/components/floating-buttons"
@@ -102,6 +103,7 @@ export default function HomePage() {
         setTestimonials={setTestimonials}
         isAdmin={isAdmin}
       />
+      <FAQSection />
       <ContactSection />
       <Footer />
       <FloatingButtons />
