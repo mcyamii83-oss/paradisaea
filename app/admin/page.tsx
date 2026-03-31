@@ -10,21 +10,24 @@ const supabase = createClient(
 export default function AdminPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [msg, setMsg] = useState('')
 
   const handleLogin = async (e: any) => {
     e.preventDefault()
+    setMsg('Verificando...')
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) alert(error.message)
+    if (error) setMsg('Error: ' + error.message)
     else window.location.href = '/'
   }
 
   return (
-    <div style={{ padding: '50px', textAlign: 'center', color: 'black', background: 'white', minHeight: '100vh' }}>
-      <h1>Panel Paradisaea</h1>
-      <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '300px', margin: 'auto' }}>
-        <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} style={{ border: '1px solid #ccc', padding: '10px' }} />
-        <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} style={{ border: '1px solid #ccc', padding: '10px' }} />
-        <button type="submit" style={{ background: 'black', color: 'white', padding: '10px' }}>Entrar</button>
+    <div style={{ padding: '100px', textAlign: 'center', fontFamily: 'sans-serif' }}>
+      <h1 style={{ color: 'black' }}>Paradisaea Admin</h1>
+      <form onSubmit={handleLogin} style={{ display: 'inline-block', textAlign: 'left', background: '#f4f4f4', padding: '20px', borderRadius: '8px' }}>
+        <input type="email" placeholder="Correo" onChange={e => setEmail(e.target.value)} style={{ display: 'block', marginBottom: '10px', width: '250px', padding: '10px' }} required />
+        <input type="password" placeholder="Contraseña" onChange={e => setPassword(e.target.value)} style={{ display: 'block', marginBottom: '10px', width: '250px', padding: '10px' }} required />
+        <button type="submit" style={{ width: '100%', padding: '10px', background: 'black', color: 'white', border: 'none', cursor: 'pointer' }}>Entrar</button>
+        {msg && <p style={{ color: 'red', marginTop: '10px' }}>{msg}</p>}
       </form>
     </div>
   )
