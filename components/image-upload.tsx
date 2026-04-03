@@ -1,13 +1,15 @@
 "use client"
 
 import { useState, useRef, useCallback } from "react"
-import { Upload, X, Image as ImageIcon } from "lucide-react"
+import { Upload, X, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+// --- IMPORTANTE: Verifica que esta ruta a tu cliente de supabase sea la correcta ---
+import { supabase } from "@/lib/supabase" 
 
 interface ImageUploadProps {
   value?: string
-  onChange: (url: string, file?: File) => void
+  onChange: (url: string) => void
   className?: string
   aspectRatio?: "square" | "video" | "wide"
 }
@@ -19,7 +21,7 @@ export function ImageUpload({
   aspectRatio = "video" 
 }: ImageUploadProps) {
   const [preview, setPreview] = useState<string>(value || "")
-  const [isDragging, setIsDragging] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const aspectClasses = {
@@ -28,70 +30,56 @@ export function ImageUpload({
     wide: "aspect-[16/9]"
   }
 
- const handleFileSelect = useCallback(async (file: File) => {
+  // --- AQUÍ ES DONDE HACES EL CAMBIO ---
+  const handleFileSelect = useCallback(async (file: File) => {
     if (!file.type.startsWith("image/")) {
+      alert("Por favor selecciona una imagen válida")
       return
     }
 
-    // 1. Mostramos una previa rápida (Local) para que no parezca que se trabó
-    const localPreview = URL.createObjectURL(file)
-    setPreview(localPreview)
-
     try {
-      // 2. SUBIDA REAL: Mandamos el archivo a la API que creamos
-      const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
-        method: "POST",
-        body: file,
-      })
+      setIsUploading(true)
 
-      if (!response.ok) throw new Error("Error al subir")
+      // 1. Crear un nombre único para que no se sobreescriban las fotos
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Math.random()}.${fileExt}`
+      const filePath = `${fileName}` // Se guardará en la raíz del bucket TOURS
 
-      const blob = await response.json()
+      // 2. SUBIR A SUPABASE (Bucket: TOURS)
+      const { error: uploadError } = await supabase.storage
+        .from('tours') // <-- Asegúrate que en Supabase se llame exactamente 'tours'
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      // 3. OBTENER LA URL PÚBLICA (La que empieza con https://)
+      const { data: { publicUrl } } = supabase.storage
+        .from('tours')
+        .getPublicUrl(filePath)
       
-      // 3. Guardamos la URL de internet (la que empieza con https://)
-      setPreview(blob.url) // Actualizamos la previa con la URL real
-      onChange(blob.url)   // Le pasamos la URL final al formulario de Tours
+      // 4. GUARDAR EN EL ESTADO
+      setPreview(publicUrl)
+      onChange(publicUrl) // Esto le manda la URL real a tu base de datos de Tours
       
-      console.log("¡Imagen guardada en la nube!", blob.url)
-    } catch (error) {
-      console.error("Error subiendo imagen:", error)
-      alert("Hubo un error al subir la imagen. Intenta de nuevo.")
-      setPreview("") // Limpiamos si falló
+      console.log("Imagen guardada permanentemente:", publicUrl)
+    } catch (error: any) {
+      console.error("Error al subir a la nube:", error.message)
+      alert("No se pudo guardar en la nube. Revisa tus políticas de Supabase.")
+    } finally {
+      setIsUploading(false)
     }
   }, [onChange])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      handleFileSelect(file)
-    }
+    if (file) handleFileSelect(file)
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-  }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    const file = e.dataTransfer.files?.[0]
-    if (file) {
-      handleFileSelect(file)
-    }
-  }
-
-  const handleRemove = () => {
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation()
     setPreview("")
     onChange("")
-    if (inputRef.current) {
-      inputRef.current.value = ""
-    }
+    if (inputRef.current) inputRef.current.value = ""
   }
 
   return (
@@ -102,95 +90,61 @@ export function ImageUpload({
         accept="image/*"
         onChange={handleInputChange}
         className="hidden"
+        disabled={isUploading}
       />
       
       {preview ? (
-        <div className={cn("relative overflow-hidden rounded-none border border-border", aspectClasses[aspectRatio])}>
+        <div className={cn("relative overflow-hidden border border-border bg-muted", aspectClasses[aspectRatio])}>
           <img
             src={preview}
             alt="Preview"
             className="w-full h-full object-cover"
           />
-          <Button
-            type="button"
-            size="icon"
-            variant="destructive"
-            className="absolute top-2 right-2 h-8 w-8 rounded-none"
-            onClick={handleRemove}
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Eliminar imagen</span>
-          </Button>
+          {!isUploading && (
+            <Button
+              type="button"
+              size="icon"
+              variant="destructive"
+              className="absolute top-2 right-2 h-8 w-8 rounded-none"
+              onClick={handleRemove}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       ) : (
         <div
-          onClick={() => inputRef.current?.click()}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
+          onClick={() => !isUploading && inputRef.current?.click()}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault()
+            const file = e.dataTransfer.files?.[0]
+            if (file && !isUploading) handleFileSelect(file)
+          }}
           className={cn(
-            "cursor-pointer border-2 border-dashed transition-colors flex flex-col items-center justify-center gap-3 rounded-none",
+            "cursor-pointer border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 transition-colors flex flex-col items-center justify-center gap-3",
             aspectClasses[aspectRatio],
-            isDragging 
-              ? "border-primary bg-primary/5" 
-              : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+            isUploading && "opacity-50 cursor-not-allowed"
           )}
         >
-          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-            <Upload className="w-5 h-5 text-muted-foreground" />
-          </div>
-          <div className="text-center">
-            <p className="text-sm font-medium text-foreground">
-              Arrastra una imagen aqui
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              o haz clic para seleccionar
-            </p>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            PNG, JPG hasta 10MB
-          </p>
+          {isUploading ? (
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-xs text-muted-foreground">Subiendo a la nube...</p>
+            </div>
+          ) : (
+            <>
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                <Upload className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <div className="text-center px-4">
+                <p className="text-sm font-medium">Subir imagen</p>
+                <p className="text-[10px] text-muted-foreground mt-1">Permanente en Supabase</p>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
   )
-}
-
-// Utility function to prepare image for server upload via FormData
-export async function prepareImageFormData(
-  file: File,
-  additionalData?: Record<string, string>
-): Promise<FormData> {
-  const formData = new FormData()
-  formData.append("image", file)
-  
-  if (additionalData) {
-    Object.entries(additionalData).forEach(([key, value]) => {
-      formData.append(key, value)
-    })
-  }
-  
-  return formData
-}
-// FUNCIÓN DE SUBIDA REAL - Conectada a tu servidor de Vercel
-export async function uploadImage(file: File): Promise<string> {
-  try {
-    // Enviamos el archivo directamente a nuestra API
-    const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
-      method: 'POST',
-      body: file,
-    })
-
-    if (!response.ok) {
-      throw new Error("Error al subir la imagen al servidor")
-    }
-
-    const data = await response.json()
-    
-    // Devolvemos la URL real de internet (la que empieza con https://)
-    return data.url 
-  } catch (error) {
-    console.error("Error en la subida:", error)
-    throw error
-  }
 }
