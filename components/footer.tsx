@@ -22,7 +22,7 @@ export function Footer() {
         <div className="max-w-6xl mx-auto">
           {/* Links */}
           <div className="flex flex-wrap justify-center items-center gap-6 mb-6">
-            {["Home", "Privacy Policy", "FAQ", "Contact Us"].map((link, index) => (
+            {["inicio", "FAQ", "Contacto"].map((link, index) => (
               <span key={link} className="flex items-center gap-6">
                 <a
                   href="#"

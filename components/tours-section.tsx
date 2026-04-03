@@ -1,10 +1,9 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Plus, Pencil, Trash2, Loader2, ImageIcon } from "lucide-react"
+import { Plus, Pencil, Trash2, Loader2, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import {
   Sheet,
@@ -33,19 +32,15 @@ interface ToursSectionProps {
 
 interface TourFormData {
   name: string
-  location: string
-  description: string
+  location: string // Usaremos este para "Día de Salida"
   price: string
-  originalPrice: string
   imageUrl: string
 }
 
 const emptyFormData: TourFormData = {
   name: "",
   location: "",
-  description: "",
   price: "",
-  originalPrice: "",
   imageUrl: "",
 }
 
@@ -80,10 +75,9 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
         const formattedTours: Tour[] = data.map((t: any) => ({
           id: String(t.id),
           name: t.name || "Sin nombre",
-          location: t.location || "",
-          description: t.description || "",
+          location: t.location || "", // Aquí viene el día de salida
+          description: "", // Ignoramos la descripción
           price: Number(t.price || 0),
-          originalPrice: t.original_price ? Number(t.original_price) : undefined,
           imageUrl: t.image_url || DEFAULT_TOUR_IMAGE, 
         }))
         setTours(formattedTours)
@@ -106,9 +100,7 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
       setFormData({
         name: tour.name,
         location: tour.location || "",
-        description: tour.description,
         price: tour.price.toString(),
-        originalPrice: tour.originalPrice?.toString() || "",
         imageUrl: tour.imageUrl,
       })
     } else {
@@ -119,63 +111,54 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault(); // PRIMORDIAL: Evita que la página se recargue
-  e.stopPropagation(); 
-  setIsSubmitting(true);
+    e.preventDefault()
+    setIsSubmitting(true)
 
-  const tourDataForSupabase = {
-    name: formData.name,
-    location: formData.location,
-    description: formData.description,
-    price: parseFloat(formData.price),
-    original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
-    image_url: formData.imageUrl || DEFAULT_TOUR_IMAGE,
-  };
-
-  try {
-    if (editingTour) {
-      const { error } = await supabase
-        .from('tours')
-        .update(tourDataForSupabase)
-        .eq('id', editingTour.id);
-      if (error) throw error;
-      
-      // Actualizamos solo el estado local para NO recargar la página
-      setTours(prev => prev.map(t => t.id === editingTour.id ? { ...t, ...formData, price: parseFloat(formData.price) } : t));
-    } else {
-      const { data, error } = await supabase
-        .from('tours')
-        .insert([tourDataForSupabase])
-        .select(); 
-      
-      if (error) throw error;
-      if (data && data[0]) {
-        // Agregamos el nuevo tour al inicio de la lista local
-        const newTour = {
-          ...data[0],
-          id: String(data[0].id),
-          imageUrl: data[0].image_url
-        };
-        setTours(prev => [newTour, ...prev]);
-      }
+    const tourDataForSupabase = {
+      name: formData.name,
+      location: formData.location, // Se guarda como el día de salida
+      description: "", // Enviamos vacío para limpiar
+      price: parseFloat(formData.price),
+      image_url: formData.imageUrl || DEFAULT_TOUR_IMAGE,
     }
 
-    setIsSheetOpen(false);
-    setFormData(emptyFormData);
-    setEditingTour(null);
-    // IMPORTANTE: No pongas window.location.reload() aquí.
-    alert("¡Tour guardado con éxito!");
-
-  } catch (error: any) {
-    alert(`Error: ${error.message}`);
-  } finally {
-    setIsSubmitting(false);
+    try {
+      if (editingTour) {
+        const { error } = await supabase
+          .from('tours')
+          .update(tourDataForSupabase)
+          .eq('id', editingTour.id)
+        if (error) throw error
+        setTours(prev => prev.map(t => t.id === editingTour.id ? { ...t, ...formData, price: parseFloat(formData.price) } : t))
+      } else {
+        const { data, error } = await supabase
+          .from('tours')
+          .insert([tourDataForSupabase])
+          .select()
+        
+        if (error) throw error
+        if (data && data[0]) {
+          const newTour = {
+            ...data[0],
+            id: String(data[0].id),
+            imageUrl: data[0].image_url
+          }
+          setTours(prev => [newTour, ...prev])
+        }
+      }
+      setIsSheetOpen(false)
+      setFormData(emptyFormData)
+      setEditingTour(null)
+    } catch (error: any) {
+      alert(`Error: ${error.message}`)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
-};
 
   const confirmDelete = async () => {
     if (tourToDelete) {
-      setIsSubmitting(true);
+      setIsSubmitting(true)
       try {
         const { error } = await supabase.from('tours').delete().eq('id', tourToDelete)
         if (error) throw error
@@ -185,7 +168,7 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
       } finally {
         setDeleteDialogOpen(false)
         setTourToDelete(null)
-        setIsSubmitting(false);
+        setIsSubmitting(false)
       }
     }
   }
@@ -198,7 +181,7 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="font-serif text-3xl md:text-4xl italic text-foreground">Explora Nuestros Tours</h2>
-          <p className="text-muted-foreground mt-2 max-w-xl mx-auto">Experiencias inolvidables en México.</p>
+          <p className="text-muted-foreground mt-2 max-w-xl mx-auto">Experiencias inolvidables diseñadas para ti.</p>
         </div>
 
         {isAdmin && (
@@ -234,11 +217,14 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
                 </div>
                 <div className="flex-grow">
                   <h3 className="font-semibold text-sm truncate text-foreground mb-1">{tour.name}</h3>
-                  <p className="text-muted-foreground text-xs mb-3">{tour.location}</p>
+                  <div className="flex items-center text-muted-foreground text-[10px] mb-3">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    <span>Salida: {tour.location}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 mt-auto border-t pt-2">
+                <div className="flex flex-col gap-0 mt-auto border-t pt-2">
+                  <span className="text-[9px] text-muted-foreground uppercase tracking-tighter">Desde</span>
                   <span className="text-primary font-bold text-sm">${tour.price.toLocaleString()}</span>
-                  {tour.originalPrice && <span className="text-muted-foreground text-xs line-through">${tour.originalPrice.toLocaleString()}</span>}
                 </div>
               </article>
             ))}
@@ -259,72 +245,21 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
           <SheetHeader><SheetTitle>{editingTour ? "Editar Tour" : "Nuevo Tour"}</SheetTitle></SheetHeader>
           
           <form onSubmit={handleSubmit} className="space-y-6 mt-8">
-            {/* NOMBRE */}
             <div className="grid gap-2">
               <Label htmlFor="name">Nombre del Tour</Label>
-              <Input 
-                id="name"
-                placeholder="Ej: Aventura en Cancún"
-                value={formData.name} 
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
-                required 
-                className="rounded-none" 
-              />
+              <Input id="name" placeholder="Ej: Tour a las Cascadas" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="rounded-none" />
             </div>
 
-            {/* UBICACION */}
             <div className="grid gap-2">
-              <Label htmlFor="location">Ubicación</Label>
-              <Input 
-                id="location"
-                placeholder="Ej: Quintana Roo, México"
-                value={formData.location} 
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })} 
-                className="rounded-none" 
-              />
+              <Label htmlFor="location">Día de Salida</Label>
+              <Input id="location" placeholder="Ej: Sábados y Domingos" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} className="rounded-none" />
             </div>
 
-            {/* DESCRIPCION */}
             <div className="grid gap-2">
-              <Label htmlFor="description">Descripción</Label>
-              <Textarea 
-                id="description"
-                placeholder="Describe los detalles de la experiencia..."
-                value={formData.description} 
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
-                className="rounded-none resize-none" 
-                rows={4}
-              />
+              <Label htmlFor="price">Precio desde (Solo números)</Label>
+              <Input id="price" type="number" placeholder="1500" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required className="rounded-none" />
             </div>
 
-            {/* PRECIOS */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="price">Precio Venta (USD)</Label>
-                <Input 
-                  id="price"
-                  type="number" 
-                  placeholder="150"
-                  value={formData.price} 
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })} 
-                  required 
-                  className="rounded-none" 
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="originalPrice">Precio Original</Label>
-                <Input 
-                  id="originalPrice"
-                  type="number" 
-                  placeholder="200"
-                  value={formData.originalPrice} 
-                  onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })} 
-                  className="rounded-none" 
-                />
-              </div>
-            </div>
-
-            {/* IMAGEN */}
             <div className="grid gap-2">
               <Label>Imagen del Tour</Label>
               <ImageUpload value={formData.imageUrl} onChange={(url) => setFormData({ ...formData, imageUrl: url })} aspectRatio="video" />
@@ -344,7 +279,7 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
         <AlertDialogContent className="rounded-none">
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar tour?</AlertDialogTitle>
-            <AlertDialogDescription>Esta acción es permanente y no se puede deshacer.</AlertDialogDescription>
+            <AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-none">Cancelar</AlertDialogCancel>

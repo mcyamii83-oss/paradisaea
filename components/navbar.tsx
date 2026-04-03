@@ -75,9 +75,9 @@ export function Navbar({ isAdmin, setIsAdmin }: NavbarProps) {
                 <Phone className="w-3.5 h-3.5 text-primary" />
                 <span>52 55 35 01 32 94</span>
               </a>
-              <a href="mailto:ventas.paradisaea@gmail.com" className="flex items-center gap-2 hover:text-primary transition-colors">
+              <a href="mailto:contacto@paradisaea.com.mx" className="flex items-center gap-2 hover:text-primary transition-colors">
                 <Mail className="w-3.5 h-3.5 text-primary" />
-                <span>ventas.paradisaea@gmail.com</span>
+                <span>contacto@paradisaea.com.mx</span>
               </a>
             </div>
           </div>

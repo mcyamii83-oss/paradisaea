@@ -20,7 +20,7 @@ const CONFIG = {
   whatsapp: "525535013294", // Tu numero de WhatsApp (sin + ni espacios)
   phone: "+52 55 3501 32 94", // Numero formateado para mostrar
   phone2: "+52 55 5456 9159", // Segundo numero (opcional)
-  email: "ventas.paradisaea@gmail.com",
+  email: "contacto@paradisaea.com.mx",
   location: "Villa Coapa, Ciudad de Mexico",
 }
 // ============================================
