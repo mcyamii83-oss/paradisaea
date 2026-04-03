@@ -1,12 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Estas variables buscarán las llaves en tu archivo .env.local
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL_V2 || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY_V2 || ''
+// 1. Buscamos primero la versión _V2 (Vercel) y si no existe, la normal (Local)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL_V2 || process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY_V2 || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-// Si no las encuentra, nos avisará en la consola del navegador
+// 2. Si no encuentra ninguna de las dos, lanza el error
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("⚠️ Falta configurar las llaves de Supabase en el archivo .env.local")
+  throw new Error("❌ Error: No se encontraron las variables de Supabase en .env.local ni en Vercel")
 }
 
+// 3. Conectamos
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
