@@ -73,7 +73,7 @@ export function Navbar({ isAdmin, setIsAdmin }: NavbarProps) {
             <div className="flex items-center justify-end gap-6 text-sm text-white/80">
               <a href="tel:+525501135254" className="flex items-center gap-2 hover:text-primary transition-colors">
                 <Phone className="w-3.5 h-3.5 text-primary" />
-                <span>52 55 01 13 52 54</span>
+                <span>52 55 35 01 32 94</span>
               </a>
               <a href="mailto:ventas.paradisaea@gmail.com" className="flex items-center gap-2 hover:text-primary transition-colors">
                 <Mail className="w-3.5 h-3.5 text-primary" />

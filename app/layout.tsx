@@ -17,7 +17,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: 'Paradisaea | Luxury Travel Experiences',
+  title: 'Paradisaea | Viajes Exclusivos',
   description: 'Discover exclusive travel experiences curated for the discerning traveler. Bespoke journeys to extraordinary destinations.',
   generator: 'v0.app',
   icons: {
