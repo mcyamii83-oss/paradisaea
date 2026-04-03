@@ -87,7 +87,7 @@ export function AdminLoginDialog({ open, onOpenChange, onLoginSuccess }: AdminLo
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@paradisaea.com"
+                placeholder="tu-correo@ejemplo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-white/5 border-white/10 text-white rounded-none focus-visible:ring-primary h-11"
