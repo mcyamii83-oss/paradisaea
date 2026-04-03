@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Plus, Pencil, Trash2, Loader2, Calendar } from "lucide-react"
+import { Plus, Pencil, Trash2, Loader2, Calendar, Clock } from "lucide-react" // Añadimos Clock
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -33,6 +33,7 @@ interface ToursSectionProps {
 interface TourFormData {
   name: string
   location: string // Usaremos este para "Día de Salida"
+  description: string // Usaremos este para "Duración"
   price: string
   imageUrl: string
 }
@@ -40,6 +41,7 @@ interface TourFormData {
 const emptyFormData: TourFormData = {
   name: "",
   location: "",
+  description: "",
   price: "",
   imageUrl: "",
 }
@@ -75,8 +77,8 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
         const formattedTours: Tour[] = data.map((t: any) => ({
           id: String(t.id),
           name: t.name || "Sin nombre",
-          location: t.location || "", // Aquí viene el día de salida
-          description: "", // Ignoramos la descripción
+          location: t.location || "",
+          description: t.description || "", // Aquí guardamos la duración
           price: Number(t.price || 0),
           imageUrl: t.image_url || DEFAULT_TOUR_IMAGE, 
         }))
@@ -100,6 +102,7 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
       setFormData({
         name: tour.name,
         location: tour.location || "",
+        description: tour.description || "",
         price: tour.price.toString(),
         imageUrl: tour.imageUrl,
       })
@@ -116,8 +119,8 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
 
     const tourDataForSupabase = {
       name: formData.name,
-      location: formData.location, // Se guarda como el día de salida
-      description: "", // Enviamos vacío para limpiar
+      location: formData.location,
+      description: formData.description, // Se guarda la duración
       price: parseFloat(formData.price),
       image_url: formData.imageUrl || DEFAULT_TOUR_IMAGE,
     }
@@ -141,7 +144,8 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
           const newTour = {
             ...data[0],
             id: String(data[0].id),
-            imageUrl: data[0].image_url
+            imageUrl: data[0].image_url,
+            description: data[0].description
           }
           setTours(prev => [newTour, ...prev])
         }
@@ -215,13 +219,22 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
                     </div>
                   )}
                 </div>
-                <div className="flex-grow">
-                  <h3 className="font-semibold text-sm truncate text-foreground mb-1">{tour.name}</h3>
-                  <div className="flex items-center text-muted-foreground text-[10px] mb-3">
-                    <Calendar className="h-3 w-3 mr-1" />
+                <div className="flex-grow px-1">
+                  <h3 className="font-semibold text-sm truncate text-foreground mb-2">{tour.name}</h3>
+                  
+                  {/* Día de Salida */}
+                  <div className="flex items-center text-muted-foreground text-[10px] mb-1">
+                    <Calendar className="h-3 w-3 mr-1 text-primary" />
                     <span>Salida: {tour.location}</span>
                   </div>
+
+                  {/* Duración del Tour */}
+                  <div className="flex items-center text-muted-foreground text-[10px] mb-3">
+                    <Clock className="h-3 w-3 mr-1 text-primary" />
+                    <span>Duración: {tour.description}</span>
+                  </div>
                 </div>
+
                 <div className="flex flex-col gap-0 mt-auto border-t pt-2">
                   <span className="text-[9px] text-muted-foreground uppercase tracking-tighter">Desde</span>
                   <span className="text-primary font-bold text-sm">${tour.price.toLocaleString()}</span>
@@ -253,6 +266,11 @@ export function ToursSection({ isAdmin }: ToursSectionProps) {
             <div className="grid gap-2">
               <Label htmlFor="location">Día de Salida</Label>
               <Input id="location" placeholder="Ej: Sábados y Domingos" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} className="rounded-none" />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="description">Duración del Tour</Label>
+              <Input id="description" placeholder="Ej: 3 días, 2 noches" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="rounded-none" />
             </div>
 
             <div className="grid gap-2">
