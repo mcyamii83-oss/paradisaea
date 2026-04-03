@@ -38,10 +38,10 @@ export function Footer() {
           {/* Copyright */}
           <div className="text-center space-y-2">
             <p className="text-white/50 text-xs">
-              Copyright TourVisor 2024 All Right Reserved
+              Copyright 2026 All Right Reserved
             </p>
             <p className="text-white/50 text-xs">
-              Developed By Gmextelaica
+              Colibrí Visual
             </p>
           </div>
         </div>
